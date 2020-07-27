@@ -6,7 +6,7 @@
 
 
 
-
+/*
 #define FILTER_N 12
 
 float Filter(char DIR)   // DIR may be 'x','y','z' 
@@ -31,7 +31,7 @@ float Filter(char DIR)   // DIR may be 'x','y','z'
     
     return (float)(filterSum / FILTER_N);
 }
-
+*/
 
 #define FILTER_N_3AIX 36
 
@@ -52,9 +52,9 @@ void Filter_3aix(float * filterSum_X, float * filterSum_Y, float * filterSum_Z)
         delay(5);
     }
 
-    *filterSum_X = *filterSum_X / FILTER_N_3AIX ;
-    *filterSum_Y = *filterSum_Y / FILTER_N_3AIX ;
-    *filterSum_Z = *filterSum_Z / FILTER_N_3AIX ;
+    *filterSum_X = *filterSum_X * 10 / FILTER_N_3AIX ;
+    *filterSum_Y = *filterSum_Y * 10 / FILTER_N_3AIX ;
+    *filterSum_Z = *filterSum_Z * 10 / FILTER_N_3AIX ;
     
 }
 
@@ -115,6 +115,9 @@ void loop()
   */
 
 //~~~~~~~~~~~STEP COUNTER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//#define STEP_THD 0.05
+#define STEP_THD 0.1
+   
    static float oldAccx, oldAccy, oldAccz, oldDot;
    static int stepNumber = 0;
 
@@ -128,9 +131,9 @@ void loop()
    float newAcc = abs(sqrt(accx * accx + accy * accy + accz * accz));
    dot /= (oldAcc * newAcc);  // 计算加速度变化程度
 
-   Serial.printf("dot:%5.3f\noldDot:%5.3f\n ", dot, oldDot);
+   Serial.printf("dot:%5.3f\noldDot:%5.3f\n", dot, oldDot);
 
-   if(abs(dot - oldDot) >= 0.05) 
+   if(abs(dot - oldDot) >= STEP_THD) 
    {
         // 变化程度超过阈值，则判定步数增加
         // 并打印
@@ -154,6 +157,8 @@ void loop()
   if(digitalRead(M5_BUTTON_HOME) == LOW){
     M5.Lcd.pushImage(0, 0, 160, 80, img2);
     digitalWrite(M5_LED, LOW);
+
+    stepNumber = 0 ;
   }else{
     digitalWrite(M5_LED, HIGH);
   }
