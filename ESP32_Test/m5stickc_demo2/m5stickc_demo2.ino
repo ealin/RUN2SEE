@@ -6,7 +6,7 @@
 
 
 
-/*
+
 #define FILTER_N 12
 
 float Filter(char DIR)   // DIR may be 'x','y','z' 
@@ -31,7 +31,7 @@ float Filter(char DIR)   // DIR may be 'x','y','z'
     
     return (float)(filterSum / FILTER_N);
 }
-*/
+
 
 #define FILTER_N_3AIX 36
 
@@ -100,6 +100,8 @@ void setup()
 
 }
 
+
+
 void loop() 
 {
   /*
@@ -115,16 +117,26 @@ void loop()
   */
 
 //~~~~~~~~~~~STEP COUNTER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#define SAMPLING_METHOD_1BY1
+
 //#define STEP_THD 0.05
-#define STEP_THD 0.1
+#define STEP_THD 0.05
    
    static float oldAccx, oldAccy, oldAccz, oldDot;
    static int stepNumber = 0;
 
-   float accx ;//= Filter('x');  // 读取滤波后的加速度 x 分量
-   float accy ;//= Filter('y');
-   float accz ;//= Filter('z');
+#ifdef SAMPLING_METHOD_1BY1
+   float accx = Filter('x') ;  // 读取滤波后的加速度 x 分量
+   float accy = Filter('y') ;
+   float accz = Filter('z') ;
    Filter_3aix(&accx, &accy, &accz) ;
+#else
+   float accx ; // 读取滤波后的加速度 x 分量
+   float accy ;
+   float accz ;
+   Filter_3aix(&accx, &accy, &accz) ;
+#endif
+   
    float dot = (oldAccx * accx)+(oldAccy * accy)+(oldAccz * accz);
 
    float oldAcc = abs(sqrt(oldAccx * oldAccx + oldAccy * oldAccy + oldAccz * oldAccz));
