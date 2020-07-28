@@ -119,7 +119,6 @@ void loop()
 //~~~~~~~~~~~STEP COUNTER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #define SAMPLING_METHOD_1BY1
 
-//#define STEP_THD 0.05
 #define STEP_THD 0.05
    
    static float oldAccx, oldAccy, oldAccz, oldDot;
@@ -180,6 +179,6 @@ void loop()
     esp_restart();
   }
 
-  delay(200);
+  delay(100);
  
 }
