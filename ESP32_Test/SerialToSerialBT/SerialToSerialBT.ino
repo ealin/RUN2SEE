@@ -11,11 +11,13 @@
 xxxx
 #endif
 
+// ESP32 Arduino SPP - Android 測試OK;  iOS 不相容
+
 BluetoothSerial SerialBT;
 
 void setup() {
   Serial.begin(115200);
-  SerialBT.begin("ESP32test"); //Bluetooth device name
+  SerialBT.begin("ESP32test-Ealin"); //Bluetooth device name
   Serial.println("The device started, now you can pair it with bluetooth!");
 }
 
