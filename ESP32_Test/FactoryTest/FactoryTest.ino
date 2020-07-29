@@ -1351,7 +1351,7 @@ void loop()
     DisplayMicro();
     DisIRSend();
     DisPlayBLESend();
-    //DisplayWIFI();
+    DisplayWIFI();
     if (TestMode)
     {
         DisplayI2CENV();
