@@ -1,4 +1,4 @@
-
+//
 #include "config.h"
 #include "step_counting.h"
 
@@ -63,10 +63,12 @@ void setup()
 
 void loop() 
 {
+ #if _CALCULATE_SAMPLING_TIME_ == 1
+   unsigned long t1 = millis();
+   static unsigned long counter = 0 ;
+ #endif
+//~~~~~~~~~~~STEP COUNTER - BEGIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-//~~~~~~~~~~~STEP COUNTER~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-   
    static float oldAccx, oldAccy, oldAccz, oldDot;
    static int stepNumber = 0;
 
@@ -87,12 +89,13 @@ void loop()
    float newAcc = abs(sqrt(accx * accx + accy * accy + accz * accz));
    dot /= (oldAcc * newAcc);  // 计算加速度变化程度
 
-   Serial.printf("dot:%5.3f\noldDot:%5.3f\n", dot, oldDot);
+   #if _DEBUG_LOG_ == 1
+     Serial.printf("dot:%5.3f\noldDot:%5.3f\n", dot, oldDot);
+   #endif
 
    if(abs(dot - oldDot) >= STEP_THD) 
    {
-        // 变化程度超过阈值，则判定步数增加
-        // 并打印
+        // 变化程度超过阈值，则判定步数增加; 并打印
         stepNumber += 1;
         Serial.println(stepNumber);
 
@@ -106,35 +109,52 @@ void loop()
    oldAccy = accy;
    oldAccz = accz;
    oldDot = dot;
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//~~~~~~~~~~~STEP COUNTER - END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-#ifdef TARGET_M5STACK_GARY
-  if(M5.BtnA.wasPressed()) 
-  {
-    Serial.printf("Key-A pressed") ;
-    M5.Lcd.pushImage(0, 0, 160, 80, img2);
-    stepNumber = 0 ;
-  }
-#endif
+  #if _CALCULATE_SAMPLING_TIME_ == 1
+    unsigned long t2 = millis();
+    Serial.printf("loop #%5d: %5d ms - sampling once\n", counter,t2-t1) ;
+  #endif
 
- #ifdef TARGET_M5STICK_C
-  //當使用者按下ButtonA，顯示img2圖片，按下時LED亮起，放開LED就滅了
-  if(digitalRead(M5_BUTTON_HOME) == LOW){
-    M5.Lcd.pushImage(0, 0, 160, 80, img2);
-    digitalWrite(M5_LED, LOW);
+  #ifdef TARGET_M5STACK_GARY
+    if(M5.BtnA.wasPressed()) 
+    {
+      #if _DEBUG_LOG_ == 1
+         Serial.printf("Key-A pressed") ;
+      #endif
+      M5.Lcd.pushImage(0, 0, 160, 80, img2);
+      stepNumber = 0 ;
+    }
+  #endif
 
-    stepNumber = 0 ;
-  }else{
-    digitalWrite(M5_LED, HIGH);
-  }
+   #ifdef TARGET_M5STICK_C
+    //當使用者按下ButtonA，顯示img2圖片，按下時LED亮起，放開LED就滅了
+    if(digitalRead(M5_BUTTON_HOME) == LOW)
+    {
+      M5.Lcd.pushImage(0, 0, 160, 80, img2);
+      digitalWrite(M5_LED, LOW);
+  
+      stepNumber = 0 ;
+    }
+    else
+    {
+      digitalWrite(M5_LED, HIGH);
+    }
+  
+    //讓ButtonB擁有正常的Reset功能
+    if(digitalRead(M5_BUTTON_RST) == LOW)
+    {
+      esp_restart();
+    }
+  #endif
 
-  //讓ButtonB擁有正常的Reset功能
-  if(digitalRead(M5_BUTTON_RST) == LOW){
-    esp_restart();
-  }
-#endif
-
-  delay(100);
+  delay(50);
   M5.update();  // key status update
+
+  #if _CALCULATE_SAMPLING_TIME_ == 1
+    unsigned long t3 = millis();
+    Serial.printf("loop #%5d: %5d ms - loop once - %5d, %5d, %5d\n", counter++,t3-t1,t1,t2,t3) ;
+  #endif
+  
  
 }
