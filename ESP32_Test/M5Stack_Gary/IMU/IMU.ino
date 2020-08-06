@@ -52,9 +52,9 @@ void loop() {
   M5.Lcd.setCursor(220, 42);
   M5.Lcd.print(" o/s");
   M5.Lcd.setCursor(0, 65);
-  M5.Lcd.printf(" %5.2f   %5.2f   %5.2f   ", accX, accY, accZ);
+  M5.Lcd.printf(" %5.2f   %5.2f   %5.2f   ", accX*1000, accY*1000, accZ*1000);
   M5.Lcd.setCursor(220, 87);
-  M5.Lcd.print(" G");
+  M5.Lcd.print(" mG");
   M5.Lcd.setCursor(0, 110);
   M5.Lcd.printf(" %5.2f   %5.2f   %5.2f   ", pitch, roll, yaw);
   M5.Lcd.setCursor(220, 132);
