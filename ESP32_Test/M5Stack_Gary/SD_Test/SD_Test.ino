@@ -177,9 +177,21 @@ void testFileIO(fs::FS &fs, const char * path){
     file.close();
 }
 
-void setup(){
+void setup()
+{
+  // Initialize the M5Stack object
+  M5.begin();
+  /*
+    Power chip connected to gpio21, gpio22, I2C device
+    Set battery charging voltage and current
+    If used battery, please call this function in your project
+  */
+  M5.Power.begin();
+  
+  
     Serial.begin(115200);
-    if(!SD.begin()){
+    if(!SD.begin())
+    {
         Serial.println("Card Mount Failed");
         return;
     }
