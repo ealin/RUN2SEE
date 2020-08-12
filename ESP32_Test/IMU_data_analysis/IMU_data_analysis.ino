@@ -63,78 +63,81 @@ void setup()
 
 void loop() 
 {
+ enum
+ {
+  MODE_SETP_COUNTING =0,
+  MODE_DATA_COLLECTION
+ } ;
+ 
+ static int mode = MODE_SETP_COUNTING ;
+ int step_number = 0 ;
+
  #if _CALCULATE_SAMPLING_TIME_ == 1
-   unsigned long t1 = millis();
-   static unsigned long counter = 0 ;
+ static unsigned long counter = 0 ;
+ unsigned long t1,t2,t3 ;
  #endif
-//~~~~~~~~~~~STEP COUNTER - BEGIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   static float oldAccx, oldAccy, oldAccz, oldDot;
-   static int stepNumber = 0;
 
-#ifdef SAMPLING_METHOD_1BY1
-   float accx = Filter('x') ;  // 读取滤波后的加速度 x 分量
-   float accy = Filter('y') ;
-   float accz = Filter('z') ;
-#else
-   float accx ; // 读取滤波后的加速度 x 分量
-   float accy ;
-   float accz ;
-   Filter_3aix(&accx, &accy, &accz) ;
-#endif
-   
-   float dot = (oldAccx * accx)+(oldAccy * accy)+(oldAccz * accz);
-
-   float oldAcc = abs(sqrt(oldAccx * oldAccx + oldAccy * oldAccy + oldAccz * oldAccz));
-   float newAcc = abs(sqrt(accx * accx + accy * accy + accz * accz));
-   dot /= (oldAcc * newAcc);  // 计算加速度变化程度
-
-   #if _DEBUG_LOG_ == 1
-     Serial.printf("dot:%5.3f\noldDot:%5.3f\n", dot, oldDot);
-   #endif
-
-   if(abs(dot - oldDot) >= STEP_THD) 
-   {
-        // 变化程度超过阈值，则判定步数增加; 并打印
-        stepNumber += 1;
-        Serial.println(stepNumber);
-
-        M5.Lcd.fillScreen(BLACK); 
-        M5.Lcd.setCursor(0, 20);
-        M5.Lcd.printf("step: %5d", stepNumber);
-        
-   }
+ if(mode == MODE_SETP_COUNTING)
+ {
+     #if _CALCULATE_SAMPLING_TIME_ == 1
+       t1 = millis();
+     #endif
     
-   oldAccx = accx;
-   oldAccy = accy;
-   oldAccz = accz;
-   oldDot = dot;
-//~~~~~~~~~~~STEP COUNTER - END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     step_number = sampling_new_step() ;
+     if(step_number != 0)
+     {
+       Serial.println(step_number);
+       M5.Lcd.fillScreen(BLUE/*BLACK*/); 
+       M5.Lcd.setCursor(0, 20);
+       M5.Lcd.printf("step: %5d", step_number);
+     }
+    
+     #if _CALCULATE_SAMPLING_TIME_ == 1
+        t2 = millis();
+        Serial.printf("loop #%5d: %5d ms - sampling once\n", counter,t2-t1) ;
+     #endif
+ }
+ else
+ {
+    // mode == MODE_DATA_COLLECTION
+ }
 
-  #if _CALCULATE_SAMPLING_TIME_ == 1
-    unsigned long t2 = millis();
-    Serial.printf("loop #%5d: %5d ms - sampling once\n", counter,t2-t1) ;
-  #endif
-
-  #ifdef TARGET_M5STACK_GARY
+ 
+ #ifdef TARGET_M5STACK_GARY
     if(M5.BtnA.wasPressed()) 
     {
       #if _DEBUG_LOG_ == 1
-         Serial.printf("Key-A pressed") ;
+         Serial.printf("Key-A pressed - Step counting mode") ;
       #endif
-      M5.Lcd.pushImage(0, 0, 160, 80, img2);
-      stepNumber = 0 ;
+      //M5.Lcd.pushImage(0, 0, 160, 80, img2);
+      M5.Lcd.println("[Step-counting Mode]") ;
+      mode = MODE_SETP_COUNTING ;
+      reset_step_number() ;
+      stop_collection() ;
     }
-  #endif
+    else if(M5.BtnC.wasPressed())  // enter data collection mode
+    {
+      #if _DEBUG_LOG_ == 1
+         Serial.printf("Key-C presseGd - data collection mode") ;
+      #endif
+      mode = MODE_DATA_COLLECTION ;
+      start_collection() ;
+ 
+      M5.Lcd.fillScreen(TFT_BLACK);
+      M5.Lcd.setCursor(2, 60);
+      M5.Lcd.println("[Data collection Mode]\n") ;
+    }
+ #endif
 
-   #ifdef TARGET_M5STICK_C
+ #ifdef TARGET_M5STICK_C
     //當使用者按下ButtonA，顯示img2圖片，按下時LED亮起，放開LED就滅了
     if(digitalRead(M5_BUTTON_HOME) == LOW)
     {
       M5.Lcd.pushImage(0, 0, 160, 80, img2);
       digitalWrite(M5_LED, LOW);
   
-      stepNumber = 0 ;
+      reset_step_number() ;
     }
     else
     {
@@ -146,15 +149,19 @@ void loop()
     {
       esp_restart();
     }
-  #endif
+ #endif
 
-  delay(50);
-  M5.update();  // key status update
 
-  #if _CALCULATE_SAMPLING_TIME_ == 1
-    unsigned long t3 = millis();
-    Serial.printf("loop #%5d: %5d ms - loop once - %5d, %5d, %5d\n", counter++,t3-t1,t1,t2,t3) ;
-  #endif
-  
+ if(mode == MODE_SETP_COUNTING)
+ {
+    delay(50);   // 必須使每秒計步4~5次  (M5-Gray: 每個loop 260ms)
+    
+    #if _CALCULATE_SAMPLING_TIME_ == 1
+        t3 = millis();
+        Serial.printf("loop #%5d: %5d ms - loop once - %5d, %5d, %5d\n", counter++,t3-t1,t1,t2,t3) ;
+    #endif
+ }  
+ 
+ M5.update();  // key status update
  
 }

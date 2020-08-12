@@ -51,3 +51,62 @@ void Filter_3aix(float * filterSum_X, float * filterSum_Y, float * filterSum_Z)
     *filterSum_Z = *filterSum_Z * 10 / FILTER_N_3AIX ;
     
 }
+
+
+static int stepNumber = 0;
+
+void reset_step_number(void)
+{
+ stepNumber = 0 ; 
+}
+
+int get_step_number(void)
+{
+ return stepNumber ; 
+}
+
+// return 0 means no new step, else return step number
+int sampling_new_step(void)
+{
+//~~~~~~~~~~~STEP COUNTER - BEGIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   static float oldAccx, oldAccy, oldAccz, oldDot;
+   int new_step_flasg = 0 ;
+
+#ifdef SAMPLING_METHOD_1BY1
+   float accx = Filter('x') ;  // 读取滤波后的加速度 x 分量
+   float accy = Filter('y') ;
+   float accz = Filter('z') ;
+#else
+   float accx ; // 读取滤波后的加速度 x 分量
+   float accy ;
+   float accz ;
+   Filter_3aix(&accx, &accy, &accz) ;
+#endif
+   
+   float dot = (oldAccx * accx)+(oldAccy * accy)+(oldAccz * accz);
+
+   float oldAcc = abs(sqrt(oldAccx * oldAccx + oldAccy * oldAccy + oldAccz * oldAccz));
+   float newAcc = abs(sqrt(accx * accx + accy * accy + accz * accz));
+   dot /= (oldAcc * newAcc);  // 计算加速度变化程度
+
+   #if _DEBUG_LOG_ == 1
+     Serial.printf("dot:%5.3f\noldDot:%5.3f\n", dot, oldDot);
+   #endif
+
+   if(abs(dot - oldDot) >= STEP_THD) 
+   {
+        // 变化程度超过阈值，则判定步数增加; 并打印
+        stepNumber += 1;
+        new_step_flasg = stepNumber ;
+        
+   }
+    
+   oldAccx = accx;
+   oldAccy = accy;
+   oldAccz = accz;
+   oldDot = dot;
+//~~~~~~~~~~~STEP COUNTER - END~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  return new_step_flasg ;
+}
