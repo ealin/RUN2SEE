@@ -80,6 +80,8 @@ void loop()
 
  if(mode == MODE_SETP_COUNTING)
  {
+     static int color[] = {BLACK, BLUE, GREEN, RED} ;
+
      #if _CALCULATE_SAMPLING_TIME_ == 1
        t1 = millis();
      #endif
@@ -87,8 +89,9 @@ void loop()
      step_number = sampling_new_step() ;
      if(step_number != 0)
      {
+       int index = step_number % 4 ;
        Serial.println(step_number);
-       M5.Lcd.fillScreen(BLUE/*BLACK*/); 
+       M5.Lcd.fillScreen(color[index]); 
        M5.Lcd.setCursor(0, 20);
        M5.Lcd.printf("step: %5d", step_number);
      }
@@ -101,16 +104,19 @@ void loop()
  else
  {
     // mode == MODE_DATA_COLLECTION
+    sample_and_save_one_record() ;  // save 1 record
  }
 
- 
+
+ //---------------KEY event handling -------------------------
  #ifdef TARGET_M5STACK_GARY
     if(M5.BtnA.wasPressed()) 
-    {
+    {      
       #if _DEBUG_LOG_ == 1
          Serial.printf("Key-A pressed - Step counting mode") ;
       #endif
-      //M5.Lcd.pushImage(0, 0, 160, 80, img2);
+      M5.Lcd.fillScreen(BLACK); 
+      M5.Lcd.setCursor(0, 20);      
       M5.Lcd.println("[Step-counting Mode]") ;
       mode = MODE_SETP_COUNTING ;
       reset_step_number() ;
@@ -124,10 +130,11 @@ void loop()
       mode = MODE_DATA_COLLECTION ;
       start_collection() ;
  
-      M5.Lcd.fillScreen(TFT_BLACK);
+      M5.Lcd.fillScreen(BLACK);
       M5.Lcd.setCursor(2, 60);
       M5.Lcd.println("[Data collection Mode]\n") ;
     }
+  
  #endif
 
  #ifdef TARGET_M5STICK_C
