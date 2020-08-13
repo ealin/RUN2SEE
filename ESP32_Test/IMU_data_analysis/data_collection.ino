@@ -94,6 +94,7 @@ int start_collection(void) // open the file
  return 1 ;
 }
 
+static int record_no = 0 ;
 
 void stop_collection(void)  // close the file
 {
@@ -102,6 +103,7 @@ void stop_collection(void)  // close the file
   
  File_handle.close(); 
  start_falg = 0 ; 
+ record_no = 0 ;
  Serial.println("stop data collection");
 
 }
@@ -109,25 +111,44 @@ void stop_collection(void)  // close the file
 
 void sample_and_save_one_record(void)
 {
+ #define AVG_NO 10
+  
  if(start_falg == 0)
     return ;
 
- float accX = 0.0F;
- float accY = 0.0F;
- float accZ = 0.0F;
+ float accX, accX_sum = 0.0F;
+ float accY, accY_sum = 0.0F;
+ float accZ, accZ_sum = 0.0F;
 
- float gyroX = 0.0F;
- float gyroY = 0.0F;
- float gyroZ = 0.0F;
+ float gyroX, gyroX_sum = 0.0F;
+ float gyroY, gyroY_sum = 0.0F;
+ float gyroZ, gyroZ_sum = 0.0F;
 
  char record_str[100] ;
- static int record_no = 0 ;
-
+ 
  static unsigned long old_t = 0 ;
  unsigned long current_t ;
- 
- M5.IMU.getGyroData(&gyroX,&gyroY,&gyroZ);
- M5.IMU.getAccelData(&accX,&accY,&accZ);
+
+
+ for(int i = 0; i < AVG_NO; i++) 
+ {
+   M5.IMU.getGyroData(&gyroX,&gyroY,&gyroZ);  // 平均滤波
+   M5.IMU.getAccelData(&accX,&accY,&accZ);
+
+   accX_sum += accX ;
+   accY_sum += accY ;
+   accZ_sum += accZ ;
+
+   gyroX_sum += gyroX ;
+   gyroY_sum += gyroY ;
+   gyroZ_sum += gyroZ ;
+ }
+ accX = accX_sum/AVG_NO ;
+ accY = accY_sum/AVG_NO ;
+ accZ = accZ_sum/AVG_NO ;
+ gyroX = gyroX_sum/AVG_NO ;
+ gyroY = gyroY_sum/AVG_NO ;
+ gyroZ = gyroZ_sum/AVG_NO ;
 
  sprintf(record_str,"%5d, %d,%.5f,%.5f,%.5f,%.5f,%.5f,%.5f\n",record_no, millis(),accX,accY,accZ,gyroX,gyroY,gyroZ) ;
 

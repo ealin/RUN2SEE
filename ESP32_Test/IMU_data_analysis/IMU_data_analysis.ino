@@ -1,23 +1,34 @@
 //
 #include "config.h"
 #include "step_counting.h"
+#include <Ticker.h>
 
 #include "img1.h"
 #include "img2.h"
 
+#ifdef TARGET_M5STACK_GARY
+  Ticker BeepTimer ;
 
+  void beep_callback(int arg)
+  {
+    M5.Speaker.tone(NOTE_DH2, 200); //frequency 3000, with a duration of 200ms
+    Serial.println("Beep!");
+  }
+
+#endif
 
 void setup() 
 {
   M5.begin();               // Initialise the display
 
   #ifdef TARGET_M5STACK_GARY
-  /*
+    /*
     Power chip connected to gpio21, gpio22, I2C device
     Set battery charging voltage and current
     If used battery, please call this function in your project
-  */  
-  M5.Power.begin();
+    */  
+    M5.Power.begin();
+
   #endif
 
   int ret = M5.IMU.Init(); //return 0 is ok, return -1 is unknow
@@ -133,6 +144,20 @@ void loop()
       M5.Lcd.fillScreen(BLACK);
       M5.Lcd.setCursor(2, 60);
       M5.Lcd.println("[Data collection Mode]\n") ;
+    }
+    else if(M5.BtnB.wasPressed())  // start/stop 節拍器
+    {
+      static int beep_status = 0 ;
+      if(beep_status == 0)
+      {
+        BeepTimer.attach_ms(500, beep_callback,0) ;
+        beep_status = 1 ;
+      }
+      else
+      {
+        BeepTimer.detach() ;
+        beep_status = 0 ;
+      }
     }
   
  #endif
