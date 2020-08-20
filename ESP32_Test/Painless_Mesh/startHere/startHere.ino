@@ -10,8 +10,8 @@
 //************************************************************
 #include <painlessMesh.h>
 
-//#define BOARD_TTGO_TDISPLAY
-#define BOARD_M5STICK_C
+#define BOARD_TTGO_TDISPLAY
+//#define BOARD_M5STICK_C
 //#define BOARD_M5STACK_GARY
 
 #ifdef BOARD_TTGO_TDISPLAY
@@ -146,8 +146,13 @@ void loop() {
   
 }
 
-void sendMessage() {
-  String msg = "M5-HiHiHi from node ";
+void sendMessage() 
+{
+  #ifdef BOARD_TTGO_TDISPLAY
+    String msg = "TTGO-HiHiHi from node ";
+  #else
+    String msg = "M5-HiHiHi from node ";
+  #endif
   msg += mesh.getNodeId();
   msg += " myFreeMemory: " + String(ESP.getFreeHeap());
   mesh.sendBroadcast(msg);
