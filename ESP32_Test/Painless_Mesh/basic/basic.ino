@@ -22,9 +22,16 @@ void sendMessage() ; // Prototype so PlatformIO doesn't complain
 
 Task taskSendMessage( TASK_SECOND * 1 , TASK_FOREVER, &sendMessage );
 
-void sendMessage() {
+void sendMessage() 
+{
+  static int counter = 0 ;
   String msg = "[TTGO~~~]Hello from node ";
+  String temp_str = " - #" ;
+  
+  temp_str += (counter++) ;
   msg += mesh.getNodeId();
+  msg += temp_str ;
+  
   mesh.sendBroadcast( msg );
   taskSendMessage.setInterval( random( TASK_SECOND * 1, TASK_SECOND * 5 ));
 

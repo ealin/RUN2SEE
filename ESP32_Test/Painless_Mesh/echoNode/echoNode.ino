@@ -27,7 +27,14 @@ void loop() {
   mesh.update();
 }
 
-void receivedCallback( uint32_t from, String &msg ) {
+void receivedCallback( uint32_t from, String &msg ) 
+{
+  static int received_package_counter = 0 ;
+  char temp_str[64] ;
+  sprintf(temp_str,"#%4d : ACK to node - %u ", received_package_counter++,from) ;
+  String response_msg = temp_str ;
+  
   Serial.printf("echoNode: Received from %u msg=%s\n", from, msg.c_str());
-  mesh.sendSingle(from, msg);
+
+  mesh.sendSingle(from, response_msg/*msg*/);
 }

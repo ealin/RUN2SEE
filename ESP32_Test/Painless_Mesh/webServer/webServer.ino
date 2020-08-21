@@ -44,7 +44,8 @@ AsyncWebServer server(80);
 IPAddress myIP(0,0,0,0);
 IPAddress myAPIP(0,0,0,0);
 
-void setup() {
+void setup() 
+{
   Serial.begin(115200);
 
   mesh.setDebugMsgTypes( ERROR | STARTUP | CONNECTION );  // set before init() so that you can see startup messages
