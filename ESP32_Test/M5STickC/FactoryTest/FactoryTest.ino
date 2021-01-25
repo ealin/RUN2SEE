@@ -19,6 +19,7 @@
 #include "DHT12.h"
 #include "WiFi.h"
 
+
 extern const unsigned char Logodata[25600];
 extern const unsigned char error_48[4608];
 extern const unsigned char icon_ir[4608];
