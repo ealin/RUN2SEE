@@ -6,6 +6,7 @@
 #include "img1.h"
 #include "img2.h"
 
+
 #ifdef TARGET_M5STACK_GARY
   Ticker BeepTimer ;
 
@@ -114,8 +115,10 @@ void loop()
  }
  else
  {
-    // mode == MODE_DATA_COLLECTION
-    sample_and_save_one_record() ;  // save 1 record
+    #ifdef TARGET_M5STACK_GARY
+      // mode == MODE_DATA_COLLECTION
+      sample_and_save_one_record() ;  // save 1 record
+    #endif  
  }
 
 
