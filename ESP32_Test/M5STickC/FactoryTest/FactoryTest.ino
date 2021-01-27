@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
     note: need add library FastLED from library manage
     Github: https://github.com/FastLED/FastLED
