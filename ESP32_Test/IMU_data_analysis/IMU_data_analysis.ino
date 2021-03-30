@@ -62,7 +62,7 @@ void setup()
   M5.Lcd.setCursor(2, 65);
   M5.Lcd.setTextColor(WHITE);
   M5.Lcd.setTextSize(1);
-  M5.Lcd.printf("jmaker.com.tw");
+  M5.Lcd.printf("BBD.com.tw");
   delay(1500);
   M5.Lcd.fillScreen(TFT_BLACK);
 
